@@ -487,8 +487,8 @@ class TimeSeriesAPI(APIBase):
                 channel = channel_id,
                 package = package_id,
                 session = self.session.token,
-                start   = self.start,
-                end     = self.stop
+                start   = start,
+                end     = stop
             )
         )
         return np.array(resp)

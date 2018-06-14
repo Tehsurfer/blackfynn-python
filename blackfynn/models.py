@@ -2689,7 +2689,7 @@ class Record(BaseRecord):
         if isinstance(destinations[0], DataPackage):
             # if linking packages, link one at a time
             result = [
-                self._api.relationships.instances.links(self.dataset_id, relationship_type, self, d, values=v)
+                self._api.concepts.relationships.instances.link(self.dataset_id, relationship_type, self, d, values=v)
                 for d,v in zip(destinations, values)
             ]
             return RelationshipSet(relationship_type, result)
