@@ -985,6 +985,36 @@ class TimeSeries(DataPackage):
         end   = sorted([x.end   for x in channels])[-1]
         return start, end
 
+    def segments(self, start=None, stop=None):
+        """
+        Returns list of contiguous data segments available for package. Segments are
+        assesssed for all channels, and the union of segments is returned.
+        
+        Args:
+            start (int, datetime, optional): return segments starting after this time
+                                             (default earliest start of any channel)
+            stop (int, datetime, optional):  return segments starting before this time
+                                             (default latest end time of any channel)
+
+        Returns:
+            List of tuples, where each tuple represents the (start, stop) of contiguous data.
+        """
+        # flattenened list of segments across all channels
+        channel_segments = [
+            segment for channel in self.channels 
+            for segment in channel.segments(start=start, stop=stop)
+        ]
+        # union all segments
+        union_segments = []
+        for begin,end in sorted(channel_segments):
+            if union_segments and union_segments[-1][1] >= begin - 1:
+                new_segment = (union_segments[-1][0], max(union_segments[-1][1], end))
+                union_segments.pop()
+                union_segments.append(new_segment)
+            else:
+                union_segments.append((begin, end))
+        return union_segments
+
     @property
     def channels(self):
         """
@@ -1326,8 +1356,17 @@ class TimeSeriesChannel(BaseDataNode):
         r = self._api.timeseries.update_channel(self)
         self.__dict__.update(r.__dict__)
 
-    @property
     def segments(self, start=None, stop=None):
+        """
+        Return list of contiguous segments of valid data for channel.
+
+        Args:
+            start (long, datetime, optional): return segments starting after this time (default start of channel)
+            stop (long, datetime, optional):  return segments starting before this time (default end of channel)
+
+        Returns:
+            List of tuples, where each tuple represents the (start, stop) of contiguous data.
+        """
         start = self.start if start is None else start
         stop  = self.end   if stop  is None else stop
         return self._api.timeseries.get_segments(self._pkg, self, start=start, stop=stop)
@@ -1760,7 +1799,7 @@ class Organization(BaseNode):
 
         self.name = name
         self.terms = terms
-        self.feature = features or []
+        self.features = features or []
         self.subscription_state = subscription_state
         self.encryption_key_id = encryption_key_id
         self.slug = name.lower().replace(' ','-') if slug is None else slug
@@ -1787,6 +1826,7 @@ class Organization(BaseNode):
 class Dataset(BaseCollection):
     def __init__(self, name, description=None, **kwargs):
         kwargs.pop('package_type', None)
+        kwargs.pop('type', None)
         super(Dataset, self).__init__(name, "DataSet", **kwargs)
         self.description = description or ''
 
