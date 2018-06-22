@@ -1876,21 +1876,64 @@ class Dataset(BaseCollection):
         Defines a ``Model`` on the platform.
 
         Args:
-            name (str):                  name of the model
-            description (str, optional): description of the model
-            schema (dict, optional):     definitation of the model's schema
+            name (str):                  Name of the model
+            description (str, optional): Description of the model
+            schema (list, optional):     Definition of the model's schema as list of ModelProperty objects.
 
         Returns:
             The newly created ``Model``
 
-        Example::
+        Note:
+            It is required that a model includes at least _one_ property that serves as the "title".
 
-            ds.create_concept('mouse', 'Mouse', 'epileptic mice', schema={'id': str, 'weight': float})
+        Example:
+            
+            Create a participant model, including schema::
+
+                ds.create_model('participant',
+                    description = 'a human participant in a research study',
+                    schema = [
+                        ModelProperty('name', data_type=str, title=True),
+                        ModelProperty('age',  data_type=int)
+                    ]
+                )
+
+            Or define schema using dictionary::
+
+                ds.create_model('participant',
+                    schema = [
+                        {
+                            'name': 'full_name',
+                            'type': str, 
+                            'title': True
+                        },
+                        {
+                            'name': 'age',
+                            'type': int,
+                        }
+                ])
+
+            You can also create a model and define schema later::
+
+                # create model
+                pt = ds.create_model('participant')
+
+                # define schema
+                pt.add_property('name', str, title=True)
+                pt.add_property('age', int)
+
         """
-        c = Model(dataset_id=self.id, name=name, display_name=display_name, description=description, schema=schema, **kwargs)
+
+        c = Model(
+            dataset_id   = self.id,
+            name         = name,
+            display_name = display_name if display_name else name,
+            description  = description,
+            schema       = schema,
+            **kwargs)
         return self._api.concepts.create(self.id, c)
 
-    def create_relationship(self, name, description, schema=None, **kwargs):
+    def create_relationship_type(self, name, description, schema=None, **kwargs):
         """
         Defines a ``RelationshipType`` on the platform.
 
@@ -1904,9 +1947,14 @@ class Dataset(BaseCollection):
 
         Example::
 
-            ds.create_relationship('belongs-to', 'this belongs to that')
+            ds.create_relationship_type('belongs-to', 'this belongs to that')
         """
-        r = RelationshipType(dataset_id=self.id, name=name, description=description, schema=schema, **kwargs)
+        r = RelationshipType(
+                dataset_id  = self.id,
+                name        = name,
+                description = description,
+                schema      = schema,
+                **kwargs)
         return self._api.concepts.relationships.create(self.id, r)
 
     @property
@@ -2090,8 +2138,8 @@ class BaseModelProperty(object):
 
     @classmethod
     def from_dict(cls, data):
-        display_name = data.get('displayName', dict())
-        data_type = data.get('data_type', data.get('dataType'))
+        display_name = data.get('displayName', data.get('display_name', dict()))
+        data_type = data.get('data_type', data.get('type', data.get('dataType')))
         locked = data.get('locked', False)
         default = data.get('default', True)
         title = data.get('title', data.get('conceptTitle', False))
@@ -2253,6 +2301,42 @@ class BaseModelNode(BaseNode):
             self.update()
         except:
             raise Exception("local object updated, but failed to update remotely")
+
+    def remove_property(self, property):
+        """
+        Remove property from model schema.
+
+        Args:
+            property (string, ModelProperty): Property to remove. Can be property name, id, or object.
+
+        """
+
+        # verify property in schema
+        prop_name = None
+        if isinstance(property, basestring):
+            # assume property name first, then assume ID
+            if property in self.schema:
+                # property is name
+                prop_name = property
+            else:
+                # property may be id
+                ids = map(lambda x: x.id, self.schema.values())
+                if property in ids:
+                    prop_name = self.schema.value()[ids.index(property)].name
+
+        elif isinstance(property, ModelProperty):
+            prop_name = property.name
+
+        else:
+            raise Exception("Expected 'property' argument of type string or ModelProperty, found type {}".format(type(property)))
+
+        if prop_name is None:
+            raise Exception("Property '{}' not found in model's schema.".format(property))
+
+        prop_id = self.schema.get(prop_name).id
+            
+        self._api.concepts.delete_property(self.dataset_id, self, prop_id)
+        self.schema.pop(prop_name)
 
     def get_property(self, name):
         """

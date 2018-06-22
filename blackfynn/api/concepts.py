@@ -32,6 +32,7 @@ class ModelsAPIBase(APIBase):
         else:
             raise Exception("could not get relationship type from relationship {} or instance {} ".format(relationship, instance))
 
+
 class ModelsAPI(ModelsAPIBase):
     base_uri = "/datasets"
     name = 'concepts'
@@ -56,6 +57,15 @@ class ModelsAPI(ModelsAPIBase):
         dataset_id = self._get_id(dataset)
         resp = self._put(self._uri('/{dataset_id}/concepts/{id}/properties', dataset_id=dataset_id, id=concept.id), json=data)
         return [ModelProperty.from_dict(r) for r in resp]
+
+    def delete_property(self, dataset, concept, prop):
+        dataset_id  = self._get_id(dataset)
+        concept_id  = self._get_id(concept)
+        property_id = self._get_id(prop)
+        return self._del(self._uri('/{dataset_id}/concepts/{concept_id}/properties/{property_id}',
+                dataset_id  = dataset_id,
+                concept_id  = concept_id,
+                property_id = property_id))
 
     def get(self, dataset, concept):
         dataset_id = self._get_id(dataset)
@@ -121,7 +131,6 @@ class ModelsAPI(ModelsAPIBase):
                 instance_id=instance_id
             ))
         return [DataPackage.from_dict(pkg, api=self.session) for r,pkg in resp]
-
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
