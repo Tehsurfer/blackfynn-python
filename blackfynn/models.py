@@ -2333,7 +2333,7 @@ class BaseModelNode(BaseNode):
             At least one property on a model needs to serve as the model's title.
             See ``title`` argument in example(s) below.
 
-        Example::
+        Example:
 
             Add properties using ``ModelProperty`` objects::
 
