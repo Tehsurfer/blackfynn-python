@@ -786,26 +786,42 @@ class DataPackage(BaseDataNode):
         self._check_exists()
         return self._api.packages.get_view(self)
 
-    def link(self, *records):
+    def relate_to(self, *records):
         """
-        Links a ``DataPackage`` to a ``Record`` given a type of ``belongs_to``.
+        Relate current ``DataPackage`` to one or more ``Record``s
 
         Args:
-            records (list of Record): records to relate to data package
+            records (list of Records): Records to relate to data package
 
         Returns:
             ``Relationship`` that defines the link
 
-        Example::
+        Example:
+    
+            Relate package to a single record::
 
-            eeg.link('from', mouse_001)
+                eeg.relate_to(participant_123)
+            
+            Relate package to multiple records::
+
+                # relate to explicit list of records
+                eeg.relate_to(
+                    participant_001
+                    participant_002,
+                    participant_003,
+                )
+
+                # relate to all participants
+                eeg.relate_to(participants.get_all())
 
         Note:
-            Relationship direction is ``Record`` --to--> ``DataPackage``.
+            The created relationship will be of the form ``DataPackage`` --(``belongs_to``)--> ``Record``.
         """
-        values = dict() if values is None else values
         self._check_exists()
-        assert isinstance(record, Record), "record must be object of type Record"
+        if isinstance(records, Record):
+            records = [records]
+
+        assert all([isinstance(r, Record) for r in records]), "all records must be object of type Record"
 
         # auto-create relationship type
         relationships = self._api.concepts.relationships.get_all(self.dataset)
@@ -813,7 +829,13 @@ class DataPackage(BaseDataNode):
             r = RelationshipType(dataset_id=self.dataset, name='belongs_to', description='belongs_to')
             self._api.concepts.relationships.create(self.dataset, r)
 
-        return self._api.concepts.relationships.instances.link(self.dataset, 'belongs_to', records, self, values)
+        # create relationships
+        relationships = [
+            Relationship(type=relationship_type.type, dataset_id=self.dataset, source=r.id, destination=self)
+            for r in records
+        ]
+        # use batch endpoint to create relationships
+        return self._api.concepts.relationships.instances.create_many(self.dataset, "belongs_to", *relationships)
 
     def as_dict(self):
         d = super(DataPackage, self).as_dict()
@@ -2692,74 +2714,45 @@ class Record(BaseRecord):
     def _get_links(self, model):
         return self._api.concepts.instances.relations(self.dataset_id, self, model)
 
-    def links(self, model, relationship=None):
+    def get_related(self, model=None, group=False):
         """
-        Returns all neighboring records of the given model type and their relationships to this instance.
-        Optionally, filtered by a type of relationship.
+        Returns all related records.
 
         Args:
-            model (str, Model):                         type of neighboring model desired
-            relationship (str, RelationshipType, optional): relationship type to filter results by
+            model (str, Model, optional):         Return only related records of this type
+            group (bool, optional):               If true, group results by model type (dict)
 
         Returns:
-            List of tuples of (``Relationship``, ``Record``)
+            List of ``Record``s
 
-        Example::
-            links = mouse_001.links('disease', 'has')
+            If ``group``, then result is dictionary of ``RecordSet``s where keys are model names.
+
+        Example:
+            Get all connected records of type ``disease`` with relationship ``has``::
+
+                mouse_001.get_related('disease', 'has')
+
+            Get all connected records::
+
+                mouse_001.get_related()
         """
-        links = self._get_links(model)
-
-        if relationship is None:
-            return links
+        if model is None:
+            # return all connected records
+            related_by_model = self._api.concepts.instances.get_all_related(self.dataset_id, self)
+            if group:
+                return related_by_model
+            else:
+                if len(related_by_model) == 1:
+                    # try to retain RecordSet type
+                    return related_by_model.values()[0]
+                # mixed return types, cannot keep RecordSets
+                related = []
+                for model_name, model_related in related_by_model.items():
+                    related.extend(model_related)
+                return related
         else:
-            relationship_type = self._get_relationship_type(relationship)
-            filtered = filter(lambda l: l[0].type == relationship_type, links)
-            return filtered
+            return self._api.concepts.instances.get_all_related_of_type(self.dataset_id, self, model)
 
-    def relationships(self, model, relationship=None):
-        """
-        All relationships to records of the given model that the current
-        record is a member of (as source or destination).
-
-        Args:
-            model (str, Model):                         type of neighboring records to find
-            relationship (str, RelationshipType, optional): single relationship type to filter results by
-        Returns:
-            List of ``Relationship``
-
-        Example::
-            relationships = mouse_001.neighbors('disease', 'has')
-
-        """
-        links = self.links(model, relationship)
-        if not links:
-            return list()
-        else:
-            relationships, _ = zip(*links)
-            return list(relationships)
-
-    def neighbors(self, model, relationship=None):
-        """
-        All records of the given model that are related to this record.
-        Optionally, filtered by a type of relationship.
-
-        Args:
-            model (str, Model):                         type of neighboring records desired
-            relationship (str, RelationshipType, optional): relationship type to filter results by
-
-        Returns:
-            List of ``Record``
-
-        Example::
-            diseases = mouse_001.neighbors('disease', 'has')
-
-        """
-        links = self.links(model, relationship)
-        if not links:
-            return list()
-        else:
-            _, neighbors = zip(*links)
-            return list(neighbors)
 
     def files(self):
         """
@@ -2773,7 +2766,7 @@ class Record(BaseRecord):
         """
         return self._api.concepts.files(self.dataset_id, self.type, self)
 
-    def link(self, destinations, relationship_type='related_to', values=None, direction='to'):
+    def relate_to(self, destinations, relationship_type='related_to', values=None, direction='to'):
         """
         Relate record to one or more ``Record``s or ``DataPackage``s.
 
@@ -2786,14 +2779,17 @@ class Record(BaseRecord):
         Returns:
             List of ``Relationship``s created.
 
+        Notes:
+            Destinations must all be of type ``DataPackage`` or ``Record``, you cannot mix destination types.
+
         Example:
-            Create a link between a ``Record`` and ``DataPackage``s::
+            Relate to a single ``Record``, define relationship type::
 
-                mouse_001.link([eeg, mri])
+                mouse_001.relate_to(lab_009, 'located_at')
 
-            Create a link between two ``Record``s::
+            Relate to multiple ``DataPackage``s::
 
-                mouse_001.link(lab_009, 'located_at')
+                mouse_001.relate_to([eeg, mri1, mri2])
         """
         self._check_exists()
 
@@ -2807,18 +2803,11 @@ class Record(BaseRecord):
         else:
             values = [dict(name=k, value=v) for val in values for k,v in val.items()]
 
-        print "values: ", values
         assert len(destinations)==len(values), "Length of values must match length of destinations"
-        print "values: ", values
 
         # check type
         if not (all([isinstance(d, DataPackage) for d in destinations]) or \
                 all([isinstance(d, Record)      for d in destinations])):
-            print destinations
-            print "one: {}".format((all([isinstance(d, DataPackage) for d in destinations])))
-            print "two: {}".format((all([isinstance(d, Record)      for d in destinations])))
-            for d in destinations:
-                print " * ", d, type(d)
             raise Exception("All destinations must be of object type Record or DataPackage")
 
         # auto-create relationship type
@@ -2853,7 +2842,6 @@ class Record(BaseRecord):
         else:
             raise Exception('Direction must be value "to" or "from"')
 
-        print relationships
         # use batch endpoint to create relationships
         return self._api.concepts.relationships.instances.create_many(self.dataset_id, relationship_type, *relationships)
 
@@ -2937,20 +2925,20 @@ class RelationshipType(BaseModelNode):
 
     def get_all(self):
         """
-        Retrieves all instances of the relationship from the platform.
+        Retrieves all relationships of this type from the platform.
 
         Returns:
             List of ``Relationship``
 
         Example::
 
-          belongs_to_relationships = belongs_to.get_all()
+            belongs_to_relationships = belongs_to.get_all()
         """
         return self._api.concepts.relationships.instances.get_all(self.dataset_id, self)
 
     def get(self, id):
         """
-        Retrieves an instance of the relationship by id from the platform.
+        Retrieves a relationship by id from the platform.
 
         Args:
             id (int): the id of the instance
@@ -2960,13 +2948,13 @@ class RelationshipType(BaseModelNode):
 
         Example::
 
-          mouse_001 = mouse.get(123456789)
+            mouse_001 = mouse.get(123456789)
         """
         return self._api.concepts.relationships.instances.get(self.dataset_id, id, self)
 
-    def link(self, source, destination, values=dict()):
+    def relate(self, source, destination, values=dict()):
         """
-        Links a ``Record`` to another ``Record`` or ``DataPackage`` using current relationship.
+        Relates a ``Record`` to another ``Record`` or ``DataPackage`` using current relationship.
 
         Args:
             source (Record, DataPackage):      record or data package the relationship orginates from
@@ -2979,43 +2967,57 @@ class RelationshipType(BaseModelNode):
         Example:
             Create a relationship between a ``Record`` and a ``DataPackage``::
 
-                from_relationship.link(mouse_001, eeg)
+                from_relationship.relate(mouse_001, eeg)
 
             Create a relationship (with values) between a ``Record`` and a ``DataPackage``::
 
-                from_relationship.link(mouse_001, eeg, {"date": datetime.datetime(1991, 02, 26, 07, 0)})
+                from_relationship.relate(mouse_001, eeg, {"date": datetime.datetime(1991, 02, 26, 07, 0)})
         """
         self._check_exists()
         self._validate_values_against_schema(values)
         return self._api.concepts.relationships.instances.link(self.dataset_id, self, source, destination, values)
 
-    def create_many(self, *item_list):
+    def create(self, *item_list):
         """
-        Create multiple relationships between ``Records`` using current relationship.
+        Create one or multiple relationships between records using current relationship type.
 
         Args:
-            value_list (list): Array of dictionaries corresponding to relationships to be created.
-                               Each relationship should be a dictionary containing 'source', 'destination',
-                               and optional 'values' keys, where 'values' is also a dictionary.
+            item_list (list): Dictionaries of relationships to be created.
+                               Each relationship should be a dictionary containing ``from``, ``to``,
+                               and optional ``values`` keys, where 'values' is also a dictionary.
 
         Returns:
             Array of newly created ``Relationships``s
 
+        Example:
+
+            Create single relationship::
+
+                diagnosed_with.create({
+                    'from': participant_001, 'to': parkinsons
+                })
+
+            Create multiple relationships::
+
+                diagnosed_with.create(
+                    { 'from': participant_001, 'to': parkinsons},
+                    { 'from': participant_321, 'to': als}
+                )
         """
         self._check_exists()
 
         # Check sources and destinations
         for value in item_list:
-            assert isinstance(value['destination'], (Record, DataPackage)), 'destination must be object of type Record or DataPackage'
-            assert isinstance(value['source'], (Record, DataPackage)), 'source must be object of type Record or DataPackage'
+            assert isinstance(value['to'], (Record, DataPackage)), 'destination must be object of type Record or DataPackage'
+            assert isinstance(value['from'], (Record, DataPackage)), 'source must be object of type Record or DataPackage'
             assert value['relationship_type']==self.type, u'RelationshipType type of items need to match relationship type: "{}"'.format(self.type)
 
         li_list = [
             Relationship(
                 dataset_id  = self.dataset_id,
                 type        = item['relationship_type'],
-                source      = item['source'],
-                destination = item['destination'],
+                source      = item['from'],
+                destination = item['to'],
                 values     = [
                     dict(
                         name=k,
