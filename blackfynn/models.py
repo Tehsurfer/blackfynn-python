@@ -2289,6 +2289,10 @@ class BaseModelNode(BaseNode):
         Args:
           properties (list): List of properties to add
 
+        Note:
+            At least one property on a model needs to serve as the model's title.
+            See ``title`` argument in example(s) below.
+
         Example::
 
             Add properties using ``ModelProperty`` objects::
