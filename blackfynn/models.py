@@ -2284,16 +2284,33 @@ class BaseModelNode(BaseNode):
     def add_properties(self, properties):
         """
         Appends multiple properties to the object's schema and updates the object
-        on the platform. Individual properties in the list can be specified in
-        multiple ways; as ``tuples``, ``dicts``, or just as the name of the
-        property for any properties that are simply strings.
+        on the platform. 
 
         Args:
           properties (list): List of properties to add
 
         Example::
 
-            mouse.add_properties([('weight', float), {'name': 'id', 'data_type': long}, 'description'])
+            Add properties using ``ModelProperty`` objects::
+
+                model.add_properties([
+                    ModelProperty('name', data_type=str, title=True),
+                    ModelProperty('age',  data_type=int)
+                ])
+
+            Add properties defined as list of dictionaries::
+
+                model.add_properties([
+                        {
+                            'name': 'full_name',
+                            'type': str, 
+                            'title': True
+                        },
+                        {
+                            'name': 'age',
+                            'type': int,
+                        }
+                ])
         """
         self._add_properties(properties)
 
