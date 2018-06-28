@@ -2614,7 +2614,7 @@ class Model(BaseModelNode):
 
         Example::
 
-          mouse_002 = mouse.create({"id": 2, "weight": 2.2})
+          mouse_002 = mouse.create_record({"id": 2, "weight": 2.2})
 
         """
         self._check_exists()
@@ -2630,7 +2630,7 @@ class Model(BaseModelNode):
         ci = self._api.concepts.instances.create(self.dataset_id, ci)
         return ci
 
-    def create_records(self, *values_list):
+    def create_records(self, values_list):
         """
         Creates multiple records of the model on the platform.
 
@@ -2639,6 +2639,17 @@ class Model(BaseModelNode):
 
         Returns:
             Array of newly created ``Record``s.
+
+        Example::
+
+            mouse.create_records([
+                { 'id': 311, 'weight': 1.9 },
+                { 'id': 312, 'weight': 2.1 },
+                { 'id': 313, 'weight': 1.8 },
+                { 'id': 314, 'weight': 2.3 },
+                { 'id': 315, 'weight': 2.0 }
+            ])
+
         """
         self._check_exists()
         schema_keys = set(self.schema.keys())
@@ -2670,7 +2681,7 @@ class Model(BaseModelNode):
 
     def delete_records(self, *records):
         """
-        Deletes multiple records of a concept from the platform.
+        Deletes one or more records of a concept from the platform.
 
         Args:
             *records: instances and/or ids of records to delete
@@ -2756,7 +2767,7 @@ class Record(BaseRecord):
             return self._api.concepts.instances.get_all_related_of_type(self.dataset_id, self, model)
 
 
-    def files(self):
+    def get_files(self):
         """
         All files related to the current record.
 
@@ -2764,7 +2775,8 @@ class Record(BaseRecord):
             List of data objects i.e. ``DataPackage``
 
         Example::
-            eegs = mouse_001.files()
+            mouse_001.get_files()
+
         """
         return self._api.concepts.files(self.dataset_id, self.type, self)
 
@@ -2798,7 +2810,12 @@ class Record(BaseRecord):
         # accept object or list
         if isinstance(destinations, (Record, DataPackage)):
             destinations = [destinations]
+        if isinstance(destinations, (Collection,)):
+            destinations = destinations.items
 
+        if not destinations:
+            return None
+            
         # default values
         if values is None:
             values = [dict() for _ in destinations] if values is None else values
