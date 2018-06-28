@@ -1952,6 +1952,8 @@ class Dataset(BaseCollection):
             
             Create a participant model, including schema::
 
+                from blackfynn import ModelProperty
+
                 ds.create_model('participant',
                     description = 'a human participant in a research study',
                     schema = [
