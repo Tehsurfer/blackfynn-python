@@ -1,5 +1,5 @@
 
-import urllib
+import urllib.request, urllib.parse, urllib.error
 
 # blackfynn
 from blackfynn.models import get_package_class
@@ -24,7 +24,7 @@ class APIBase(object):
         """
         Get ID for object. Assumes string is already ID.
         """
-        if isinstance(thing, (basestring, int, long)):
+        if isinstance(thing, (str, int)):
             return thing
         elif thing is None:
             return None
@@ -39,7 +39,7 @@ class APIBase(object):
         return pkg
 
     def _uri(self, url_str, **kwvars):
-        vals = {k:urllib.quote(str(var)) for k,var in kwvars.items()}
+        vals = {k:urllib.parse.quote(str(var)) for k,var in list(kwvars.items())}
         return url_str.format(**vals)
 
     def _get(self, endpoint, async=False, base=None, host=None, *args, **kwargs):

@@ -12,7 +12,7 @@ from docopt import docopt
 from blackfynn import Dataset
 from blackfynn.models import Collection
 
-from cli_utils import get_item
+from .cli_utils import get_item
 
 def main(bf):
     args = docopt(__doc__)
@@ -28,7 +28,7 @@ def main(bf):
     if destination is None or isinstance(destination, Collection):
         try:
             bf.move(destination, item)
-        except Exception, e:
+        except Exception as e:
             print(e)
             exit("Failed to move {} into {}.".format(item, destination))
     else:

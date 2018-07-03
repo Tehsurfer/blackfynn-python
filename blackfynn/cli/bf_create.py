@@ -10,9 +10,9 @@ global options:
 from docopt import docopt
 from blackfynn import Collection
 
-from cli_utils import get_item
+from .cli_utils import get_item
 
-from working_dataset import require_working_dataset
+from .working_dataset import require_working_dataset
 
 def main(bf):
     args = docopt(__doc__)

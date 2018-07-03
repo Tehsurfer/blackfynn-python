@@ -14,26 +14,26 @@ global options:
 
 from docopt import docopt
 
-from cli_utils import get_item
+from .cli_utils import get_item
 
-from working_dataset import require_working_dataset
+from .working_dataset import require_working_dataset
 
 def display(item, print_tree):
     if print_tree:
         item.print_tree()
 
     else:
-        print ("  {}".format(item))
+        print(("  {}".format(item)))
 
         if hasattr(item, 'items') and item.items:
-            print "  [contents]"
+            print("  [contents]")
             for i in item.items:
-                print "     {}".format(i)
+                print("     {}".format(i))
 
         if hasattr(item, 'channels') and item.channels:
-            print "  [channels]"
+            print("  [channels]")
             for ch in item.channels:
-                print "     {} (id: {})".format(ch.name, ch.id)
+                print("     {} (id: {})".format(ch.name, ch.id))
 
 def main(bf):
     args = docopt(__doc__)

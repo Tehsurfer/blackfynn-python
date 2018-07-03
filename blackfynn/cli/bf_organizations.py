@@ -14,4 +14,4 @@ def main(bf):
     args = docopt(__doc__)
 
     for o in bf.organizations():
-        print "  {} (id: {})".format(o.name, o.id)
+        print("  {} (id: {})".format(o.name, o.id))

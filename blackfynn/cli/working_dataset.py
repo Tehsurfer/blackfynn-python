@@ -10,7 +10,7 @@ def set_working_dataset(dataset):
         # double check
         assert working_dataset_id() is not None, "Error writing to working dataset file"
     except:
-        print "We encountered an error while setting your working dataset."
+        print("We encountered an error while setting your working dataset.")
     return None
 
 def get_dataset_file():
@@ -45,5 +45,5 @@ def require_working_dataset(bf):
              "\n")
     try:
         return bf.get_dataset(ds)
-    except Exception, e:
+    except Exception as e:
         exit(e)

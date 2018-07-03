@@ -113,7 +113,7 @@ class CoreAPI(APIBase):
         return self._data_registry.get(id, None)
 
     def get_locals(self):
-        return self._data_registry.values()
+        return list(self._data_registry.values())
 
     def rm_local(self, thing):
         id = self._get_id(thing)

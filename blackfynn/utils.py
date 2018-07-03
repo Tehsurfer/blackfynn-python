@@ -15,7 +15,7 @@ log.setLevel(os.environ.get('BLACKFYNN_LOG_LEVEL', 'INFO'))
 def value_as_type(value, dtype):
     try:
         if dtype == 'string':
-            return unicode(value)
+            return str(value)
         elif dtype == 'integer':
             return int(value)
         elif dtype == 'double':
@@ -38,7 +38,7 @@ def get_data_type(v):
         return ("boolean", str(v).lower())
     elif isinstance(v, float):
         return ("double", v)
-    elif isinstance(v, (int,long)):
+    elif isinstance(v, int):
         return ("integer", v)
     else:
         # infer via casting
@@ -68,21 +68,21 @@ def is_decimal(s):
 def infer_epoch_msecs(thing):
     if isinstance(thing, datetime.datetime):
         return msecs_since_epoch(thing)
-    elif isinstance(thing, (int,long,float)):
+    elif isinstance(thing, (int,float)):
         # assume milliseconds
-        return long(thing)
-    elif isinstance(thing, basestring):
+        return int(thing)
+    elif isinstance(thing, str):
         # attempt to convert to msec integer
-        return long(thing)
+        return int(thing)
     else:
         raise Exception("Cannot parse date")
 
 def infer_epoch(thing):
     if isinstance(thing, datetime.datetime):
         return usecs_since_epoch(thing)
-    elif isinstance(thing, (int,long,float)):
+    elif isinstance(thing, (int,float)):
         # assume microseconds
-        return long(thing)
+        return int(thing)
     else:
         raise Exception("Cannot parse date")
 
@@ -93,15 +93,15 @@ def secs_since_epoch(the_time):
 
 def msecs_since_epoch(the_time):
     # milliseconds from epoch (integer)
-    return long(secs_since_epoch(the_time)*1000)
+    return int(secs_since_epoch(the_time)*1000)
 
 def usecs_since_epoch(the_time):
     # microseconds from epoch (integer)
-    return long(secs_since_epoch(the_time)*1e6)
+    return int(secs_since_epoch(the_time)*1e6)
 
 def usecs_to_datetime(us):
     # convert usecs since epoch to proper datetime object
-    return datetime.datetime.utcfromtimestamp(0) + datetime.timedelta(microseconds=long(us))
+    return datetime.datetime.utcfromtimestamp(0) + datetime.timedelta(microseconds=int(us))
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

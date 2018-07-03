@@ -113,7 +113,7 @@ class Settings(object):
     def _load_env(self):
         override = {}
         self.env = {}
-        for key, (evar, typefunc) in ENVIRONMENT_VARIABLES.items():
+        for key, (evar, typefunc) in list(ENVIRONMENT_VARIABLES.items()):
             value = os.environ.get(evar, None)
             if value is not None:
                 v = typefunc(value)
@@ -147,7 +147,7 @@ class Settings(object):
                 self._parse_profile(name)
 
     def _parse_profile(self, name):
-        for key, value in self.config[name].items():
+        for key, value in list(self.config[name].items()):
             if value == 'none'            : self.profiles[name][key] = None
             elif value.lower() == 'true'  : self.profiles[name][key] = True
             elif value.lower() == 'false' : self.profiles[name][key] = False

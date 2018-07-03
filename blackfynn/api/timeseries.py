@@ -33,7 +33,7 @@ def parse_timedelta(time):
      - string:  e.g. '1s', '5m', '3h'
      - delta:   datetime.timedelta object
     """
-    if isinstance(time, basestring):
+    if isinstance(time, str):
         # parse string into timedelta
         regex = re.compile(r'((?P<hours>\d*\.*\d+?)hr)?((?P<minutes>\d*\.*\d+?)m)?((?P<seconds>\d*\.*\d+?)s)?')
         parts = regex.match(time)
@@ -41,16 +41,16 @@ def parse_timedelta(time):
             return
         parts = parts.groupdict()
         time_params = {}
-        for (name, param) in parts.iteritems():
+        for (name, param) in parts.items():
             if param:
                 time_params[name] = float(param)
         time = datetime.timedelta(**time_params)
 
     if isinstance(time, datetime.timedelta):
         # return microseconds
-        return long(time.total_seconds()*1e6)
+        return int(time.total_seconds()*1e6)
 
-    elif isinstance(time, (long, int, float)):
+    elif isinstance(time, (int, float)):
         # assume already in microseconds
         return time
 
@@ -63,7 +63,7 @@ vec_usecs_to_datetime = np.vectorize(usecs_to_datetime)
 class ChannelPage(object):
     def __init__(self, channel, page, settings, use_cache=True):
         self.channel   = channel
-        self.page      = long(page)
+        self.page      = int(page)
         self.use_cache = use_cache
 
         page_size = settings.ts_page_size
@@ -74,8 +74,8 @@ class ChannelPage(object):
 
         # fixed page -- determined from epoch(0)
         pg_delta = channel._page_delta(page_size)
-        self.start = long(self.page  * pg_delta)
-        self.stop  = long(self.start + pg_delta)
+        self.start = int(self.page  * pg_delta)
+        self.stop  = int(self.start + pg_delta)
         self.cache_exists = False
 
         # current future/response
@@ -171,15 +171,15 @@ class ChannelIterator(object):
         self.page_delta = channel._page_delta(api.settings.ts_page_size)
 
         # page iteration
-        self.page_start = long(math.floor(self.start/(1.0*self.page_delta)))
-        self.page_end   = long(math.ceil(self.stop /(1.0*self.page_delta)))
+        self.page_start = int(math.floor(self.start/(1.0*self.page_delta)))
+        self.page_end   = int(math.ceil(self.stop /(1.0*self.page_delta)))
 
         # chunk iteration
         self.chunk_per_page = chunk_time is None
         # chunk over specfied time
         if not self.chunk_per_page:
-            self.chunk_time = long(chunk_time) # in usecs
-            self.chunk_size = long(channel.rate * self.chunk_time/1.0e6)
+            self.chunk_time = int(chunk_time) # in usecs
+            self.chunk_size = int(channel.rate * self.chunk_time/1.0e6)
         self.chunk  = None
         self.offset = usecs_to_datetime(self.start)
 
@@ -374,7 +374,7 @@ class TimeSeriesAPI(APIBase):
           1 hour    = '1h'
         otherwise microseconds assumed.
         """
-        if isinstance(ts, basestring):
+        if isinstance(ts, str):
             # assumed to be package ID
             ts = self.session.core.get(ts)
 
@@ -388,13 +388,13 @@ class TimeSeriesAPI(APIBase):
         elif isinstance(channels,TimeSeriesChannel):
             channels = [channels]
         #1 channel specified and channel id
-        elif isinstance(channels,basestring):
+        elif isinstance(channels,str):
             channels = [ch for ch in ts.channels if ch.id==channels]
         #list of channel ids OR ts channels
         else:
             all_ch = []
             for chan in channels:
-                if isinstance(chan,basestring):
+                if isinstance(chan,str):
                     all_ch.extend([ch for ch in ts_channels if ch.id==chan])
                 else:
                     all_ch.extend([ch for ch in ts_channels if ch==chan])
@@ -404,12 +404,12 @@ class TimeSeriesAPI(APIBase):
         the_start = ts.start if start is None else infer_epoch(start)
 
         # chunk
-        if chunk_size is not None and isinstance(chunk_size, basestring):
+        if chunk_size is not None and isinstance(chunk_size, str):
             chunk_size = parse_timedelta(chunk_size)
 
         # determine end
         if length is not None:
-            if isinstance(length, basestring):
+            if isinstance(length, str):
                 length_usec = parse_timedelta(length)
             else:
                 length_usec = length
@@ -425,8 +425,8 @@ class TimeSeriesAPI(APIBase):
             raise Exception("End time cannot be before start time.")
 
         # loop through chunks
-        the_start = long(the_start)
-        the_end = long(the_end)
+        the_start = int(the_start)
+        the_end = int(the_end)
 
         channel_chunks = [
             ChannelIterator(ch, the_start, the_end, chunk_size,
@@ -503,7 +503,7 @@ class TimeSeriesAPI(APIBase):
 
         if isinstance(layer,TimeSeriesAnnotationLayer):
             data = layer.as_dict()
-        elif isinstance(layer,basestring):
+        elif isinstance(layer,str):
             data = {
                 'name' : layer,
                 'description' : description
@@ -513,7 +513,7 @@ class TimeSeriesAPI(APIBase):
 
         existing_layer = [i for i in ts.layers if data['name'] == i.name]
         if existing_layer:
-            print 'Returning existing layer {}'.format(existing_layer)
+            print('Returning existing layer {}'.format(existing_layer))
             return existing_layer[0]
         else:
             ts_id = self._get_id(ts)
@@ -601,12 +601,12 @@ class TimeSeriesAPI(APIBase):
             data = {
                 'name':'',
                 'label':annotation,
-                'start':long(start_time),
-                'end':long(end_time),
+                'start':int(start_time),
+                'end':int(end_time),
             }
             if kwargs['channel_ids']:
                 channel_ids = kwargs['channel_ids']
-                if isinstance(channel_ids,basestring):
+                if isinstance(channel_ids,str):
                     channel_ids = [channel_ids]
                 data['channelIds']=channel_ids
             else:
@@ -712,8 +712,8 @@ class TimeSeriesAPI(APIBase):
             end = usecs_since_epoch(end)
 
         params = {
-            'start': long(start),
-            'end': long(end),
+            'start': int(start),
+            'end': int(end),
             'channelIds': ch_list,
             'layerName': layer.name,
             'limit': limit,
@@ -743,8 +743,8 @@ class TimeSeriesAPI(APIBase):
         period = parse_timedelta(period)
 
         params = {
-            'start': long(start),
-            'end': long(end),
+            'start': int(start),
+            'end': int(end),
             'channelIds': ch_list,
             'period': period,
             'layer': layer.name
@@ -785,11 +785,11 @@ class TimeSeriesAPI(APIBase):
 
                         layer.insert_annotation(annotation=row['annotation_label'],channel_ids=channel_ids,start=row['start_uutc'],end=row['end_uutc'],description=row['annotation_description'])
 
-                    print 'Added annotations to layer {} , pkg: {}'.format(layer,ts)
+                    print('Added annotations to layer {} , pkg: {}'.format(layer,ts))
             else:
                 raise Exception('BF version {} not found or not supported'.format(df['version'][0]))
 
-        except Exception, error:
+        except Exception as error:
             raise Exception("Error adding annotation file {}, {}".format(file_path, error))
 
     def write_annotation_file(self,ts,file_path,layer_names):
@@ -831,8 +831,8 @@ class TimeSeriesAPI(APIBase):
                     'layer_name' : l.name,
                     'layer_description': l.description,
                     'annotation_label' : a.label,
-                    'start_uutc' : long(a.start),
-                    'end_uutc' : long(a.end),
+                    'start_uutc' : int(a.start),
+                    'end_uutc' : int(a.end),
                     'channel_names' : channel_names,
                     'annotation_description' : a.description
                 }
@@ -888,7 +888,7 @@ class TimeSeriesAPI(APIBase):
             if isinstance(ch, TimeSeriesChannel):
                 # Channel looks good
                 continue
-            if isinstance(ch, basestring):
+            if isinstance(ch, str):
                 # Assume channel ID, get object
                 ch = self.session.get(ch)
             else:

@@ -64,9 +64,9 @@ source_suffix = ['.rst', '.md']
 master_doc = 'index'
 
 # General information about the project.
-project = u'Blackfynn'
-copyright = u'Blackfynn, Inc.'
-author = u'support@blackfynn.com'
+project = 'Blackfynn'
+copyright = 'Blackfynn, Inc.'
+author = 'support@blackfynn.com'
 
 show_sphinx = False
 show_copyright = False
@@ -155,8 +155,8 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'Blackfynn.tex', u'Blackfynn Documentation',
-     u'support@blackfynn.com', 'manual'),
+    (master_doc, 'Blackfynn.tex', 'Blackfynn Documentation',
+     'support@blackfynn.com', 'manual'),
 ]
 
 
@@ -165,7 +165,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'blackfynn', u'Blackfynn Python Client Documentation',
+    (master_doc, 'blackfynn', 'Blackfynn Python Client Documentation',
      [author], 1)
 ]
 
@@ -176,7 +176,7 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'Blackfynn', u'Blackfynn Python Client Documentation',
+    (master_doc, 'Blackfynn', 'Blackfynn Python Client Documentation',
      author, 'Blackfynn', 'Python client for accessing Blackfynn platform',
      'Utilities'),
 ]

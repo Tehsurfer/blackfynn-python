@@ -9,7 +9,7 @@ global options:
 '''
 
 from docopt import docopt
-from cli_utils import print_path_tree, get_item
+from .cli_utils import print_path_tree, get_item
 
 def main(bf):
     args = docopt(__doc__)

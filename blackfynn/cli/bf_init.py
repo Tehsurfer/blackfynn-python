@@ -10,8 +10,8 @@ global options:
 from docopt import docopt
 import sys
 
-from cli_utils import print_datasets
-from working_dataset import set_working_dataset
+from .cli_utils import print_datasets
+from .working_dataset import set_working_dataset
 
 def main(bf):
     args = docopt(__doc__)

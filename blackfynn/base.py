@@ -112,7 +112,7 @@ class ClientSession(object):
 
     def _make_call(self, func, uri, *args, **kwargs):
         log.debug('~'*60)
-        log.debug("uri = {} {}".format(func.__func__.func_name, uri))
+        log.debug("uri = {} {}".format(func.__func__.__name__, uri))
         log.debug("args = {}".format(args))
         log.debug("kwargs = {}".format(kwargs))
         log.debug("headers = {}".format(self.session.headers))

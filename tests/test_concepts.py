@@ -6,10 +6,10 @@ from blackfynn.models import Model, Record, DataPackage, RelationshipType, Relat
 
 def test_concepts(dataset):
     current_ts = lambda: int(round(time.time() * 1000))
-    schema = [('an_integer', int, 'An Integer', True), ('a_long', long), ('a_bool', bool), ('a_string', str), ('a_datetime', datetime.datetime)]
+    schema = [('an_integer', int, 'An Integer', True), ('a_long', int), ('a_bool', bool), ('a_string', str), ('a_datetime', datetime.datetime)]
     display_name = 'A New Property'
     description = 'a new description'
-    values = {'an_integer': 100, 'a_long': 100000L, 'a_bool': True, 'a_string': 'fnsdlkn#$#42nlfds$3nlds$#@$23fdsnfkls', 'a_datetime': datetime.datetime.now()}
+    values = {'an_integer': 100, 'a_long': 100000, 'a_bool': True, 'a_string': 'fnsdlkn#$#42nlfds$3nlds$#@$23fdsnfkls', 'a_datetime': datetime.datetime.now()}
 
     #################################
     ## Models
@@ -35,12 +35,12 @@ def test_concepts(dataset):
 
     new_concept.add_properties([('a_new_float', float), {'name': 'a_new_int', 'data_type': int}, 'a_new_string'])
     assert new_concept.get_property('a_new_float').type == float
-    assert new_concept.get_property('a_new_int').type == long
-    assert new_concept.get_property('a_new_string').type == unicode
+    assert new_concept.get_property('a_new_int').type == int
+    assert new_concept.get_property('a_new_string').type == str
 
     nc_one = new_concept.create(values)
-    nc_two = new_concept.create({'an_integer': 1, 'a_long': 0L, 'a_bool': False, 'a_string': '', 'a_datetime': datetime.datetime.now()})
-    nc_three = new_concept.create({'an_integer': 10000, 'a_long': 9349234L, 'a_bool': False, 'a_string': '43132312', 'a_datetime': datetime.datetime.now()})
+    nc_two = new_concept.create({'an_integer': 1, 'a_long': 0, 'a_bool': False, 'a_string': '', 'a_datetime': datetime.datetime.now()})
+    nc_three = new_concept.create({'an_integer': 10000, 'a_long': 9349234, 'a_bool': False, 'a_string': '43132312', 'a_datetime': datetime.datetime.now()})
     nc_four = new_concept.create({'a_datetime': datetime.datetime.now()})
 
     nc_delete_one = new_concept.create({'a_datetime': datetime.datetime.now()})
@@ -71,7 +71,7 @@ def test_concepts(dataset):
         assert True
 
     assert nc_four.get('an_integer') == None
-    nc_four.set('an_integer', 10L)
+    nc_four.set('an_integer', 10)
     assert nc_four.get('an_integer') == 10
 
     nc_delete_three = new_concept.create({'a_string': 'delete me'})

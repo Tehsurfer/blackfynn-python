@@ -12,7 +12,7 @@ global options:
 '''
 
 from docopt import docopt
-from cli_utils import print_path_tree
+from .cli_utils import print_path_tree
 
 def main(bf):
     args = docopt(__doc__)
@@ -20,10 +20,10 @@ def main(bf):
     terms = ' '.join(args['<term>'])
     results = bf._api.search.query(terms)
     if len(results) == 0:
-        print "No Results."
+        print("No Results.")
     else:
         if args['--show-paths']:
             print_path_tree(bf, results)
         else:
             for r in results:
-                print " * {}".format(r)
+                print(" * {}".format(r))

@@ -11,7 +11,7 @@ global options:
 from docopt import docopt
 from blackfynn import DataPackage, Collection
 
-from cli_utils import get_item
+from .cli_utils import get_item
 
 def main(bf):
     args = docopt(__doc__)
@@ -23,5 +23,5 @@ def main(bf):
             raise Exception("only data packages and collections may be deleted.")
 
         bf.delete(item)
-    except Exception, e:
+    except Exception as e:
         exit("  failed to delete {}: {}".format(args['<item>'], e))

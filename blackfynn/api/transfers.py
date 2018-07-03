@@ -76,7 +76,7 @@ class UploadManager(object):
 
     @property
     def uploads(self):
-        return [(f, UPLOADS[uid]) for f, uid in self._uploads.items()]
+        return [(f, UPLOADS[uid]) for f, uid in list(self._uploads.items())]
 
     @property
     def done(self):
@@ -200,7 +200,7 @@ class IOAPI(APIBase):
             # uploading into timeseries package must be an append
             destination_id = self._get_id(destination)
             dataset_id = self._get_id(destination.dataset)
-        elif isinstance(destination, basestring):
+        elif isinstance(destination, str):
             # assume ID is for collection
             if dataset is None:
                 raise Exception("Must also supply dataset when specifying destination by ID")
@@ -280,7 +280,7 @@ class IOAPI(APIBase):
                     raise future.exception()
                 import_id = import_id_map[fname]
                 # check to see if rest of the import group has uploaded
-                if all([ name in file_results for name, id in import_id_map.items() if id == import_id ]):
+                if all([ name in file_results for name, id in list(import_id_map.items()) if id == import_id ]):
                     # trigger ETL import
                     group_results.append(self.set_upload_complete(import_id, dataset_id, destination_id, append))
 

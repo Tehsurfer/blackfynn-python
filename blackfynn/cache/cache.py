@@ -36,7 +36,7 @@ def remove_old_pages(cache, mbdiff):
     # remove the selected pages
     pages_by_channel = groupby(pages, lambda x: x[0])
     for channel, page_group in pages_by_channel:
-        _,pages,counts,times = zip(*page_group)
+        _,pages,counts,times = list(zip(*page_group))
         # remove page files
         cache.remove_pages(channel, *pages)
 
@@ -165,7 +165,7 @@ class Cache(object):
 
             # 1. check for ts_format field (not there indicating old cache)
             result = con.execute("PRAGMA table_info('settings');").fetchall()
-            fields = zip(*result)[1]
+            fields = list(zip(*result))[1]
             if 'ts_format' not in fields:
                 # this means they used an older client to initalize the cache, and because
                 # we switched the serialization format, we'll need to refresh it.
@@ -352,7 +352,7 @@ class Cache(object):
         Returns the size of the cache in bytes
         """
         all_files = self.page_files + [self.index_loc]
-        return sum(map(lambda x: os.stat(x).st_size, all_files))
+        return sum([os.stat(x).st_size for x in all_files])
 
 def get_cache(settings, start_compaction=False, init=True):
     cache = Cache(settings)

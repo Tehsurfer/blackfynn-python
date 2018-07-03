@@ -25,5 +25,5 @@ def main(bf):
             raise Exception("Only data packages may be appended to.")
 
         bf._api.io.upload_files(package, files, append=True, display_progress=True)
-    except Exception, e:
+    except Exception as e:
         exit(e)

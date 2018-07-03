@@ -20,7 +20,7 @@ def pytest_addoption(parser):
     parser.addoption("--devserver", default=[], help=("Test against dev server (not local)"))
 
 def pytest_generate_tests(metafunc):
-    print metafunc.fixturenames
+    print(metafunc.fixturenames)
     use_dev = False
     if 'devserver' in metafunc.fixturenames:
         use_dev = metafunc.config.option.devserver
@@ -43,7 +43,7 @@ def client(use_dev):
     )
     # get organizations
     orgs = bf.organizations()
-    print 'organizations =', orgs
+    print('organizations =', orgs)
     assert len(orgs) > 0
 
     # explicitly set context to Blackfyn org
@@ -108,11 +108,11 @@ def dataset(use_dev, client, superuser_client):
 
 @pytest.fixture(scope='session')
 def test_organization(client):
-    return filter(lambda o: o.name == 'Test Organization', client.organizations())[0]
+    return [o for o in client.organizations() if o.name == 'Test Organization'][0]
 
 def test_login(client):
     email = os.environ.get('BLACKFYNN_USER')
     profile = client.profile
-    print "profile = ", profile
+    print("profile = ", profile)
     assert profile['email'] == email
 

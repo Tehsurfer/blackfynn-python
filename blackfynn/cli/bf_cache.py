@@ -18,10 +18,10 @@ def main(bf):
     cache = get_cache(bf.settings, init=False)
 
     if args['clear']:
-        print "Clearing cache..."
+        print("Clearing cache...")
         cache.clear()
-        print "Cache cleared."
+        print("Cache cleared.")
     elif args['compact']:
-        print 'Compacting cache...'
+        print('Compacting cache...')
         cache.start_compaction(async=False)
-        print 'Cache compaction done.'
+        print('Cache compaction done.')

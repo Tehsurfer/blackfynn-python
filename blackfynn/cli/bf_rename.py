@@ -9,7 +9,7 @@ global options:
 '''
 
 from docopt import docopt
-from cli_utils import get_item
+from .cli_utils import get_item
 
 from blackfynn.models import BaseDataNode
 

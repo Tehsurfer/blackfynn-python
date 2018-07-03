@@ -19,7 +19,7 @@ def test_stream_upload(use_dev, client, dataset):
     ts = TimeSeries('My Test TimeSeries')
     dataset.add(ts)
     assert ts.exists
-    print ts
+    print(ts)
 
     # create channels
     channels = [TimeSeriesChannel(c, rate=freq) for c in df.columns]
@@ -28,7 +28,7 @@ def test_stream_upload(use_dev, client, dataset):
         assert ch.exists
         assert ch.rate == freq
         assert ch.name in df.columns
-    print "channels =", ts.channels
+    print("channels =", ts.channels)
 
     # stream data up
     ts.stream_data(df)

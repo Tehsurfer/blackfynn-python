@@ -15,7 +15,7 @@ class ModelsAPIBase(APIBase):
     def _get_concept_type(self, concept, instance = None):
         if isinstance(concept, Model):
             return concept.type
-        elif isinstance(concept, basestring):
+        elif isinstance(concept, str):
             return concept
         elif isinstance(instance, Record):
             return instance.type
@@ -25,7 +25,7 @@ class ModelsAPIBase(APIBase):
     def _get_relationship_type(self, relationship, instance = None):
         if isinstance(relationship, RelationshipType):
             return relationship.type
-        elif isinstance(relationship, basestring):
+        elif isinstance(relationship, str):
             return relationship
         elif isinstance(instance, Relationship):
             return instance.type
@@ -294,7 +294,7 @@ class ModelRelationshipInstancesAPI(ModelsAPIBase):
         else:
             dataset_id = self._get_id(dataset)
             relationship_type = self._get_relationship_type(relationship)
-            values = [dict(name=k, value=v) for k,v in values.items()]
+            values = [dict(name=k, value=v) for k,v in list(values.items())]
             instance = Relationship(dataset_id=dataset_id, type=relationship_type, source=source, destination=destination, values=values)
             return self.create(dataset, instance)
 
@@ -353,7 +353,7 @@ class ModelProxiesAPI(ModelsAPIBase):
         concept_instance_id = self._get_id(concept_instance)
         concept_type = self._get_concept_type(concept, concept_instance)
         relationship_type = self._get_relationship_type(relationship)
-        relationshipData = [dict(name=k, value=v) for k,v in values.items()]
+        relationshipData = [dict(name=k, value=v) for k,v in list(values.items())]
 
         request = {}
         request['externalId'] = external_id

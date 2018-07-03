@@ -152,7 +152,7 @@ def test_properties(client, dataset):
 
     pkg.insert_property('my-key','my-value')
     pkg2 = client.get(pkg)
-    print 'properties =', pkg2.properties
+    print('properties =', pkg2.properties)
     assert pkg2.id == pkg.id
     assert pkg2.get_property('my-key').data_type == 'string'
     assert pkg2.get_property('my-key').value == 'my-value'
@@ -171,7 +171,7 @@ def test_properties(client, dataset):
         'my-string3': ('string', '123123.123'),
         'my-string4': ('string', 'According to plants, humans are blurry.'),
     }
-    for key, (ptype,val) in explicit_ptypes.items():
+    for key, (ptype,val) in list(explicit_ptypes.items()):
         pkg.insert_property(key, val, data_type=ptype)
         assert pkg.get_property(key).data_type == ptype
 
@@ -184,7 +184,7 @@ def test_properties(client, dataset):
         'my-string': ('string', 'i123123'),
         'my-string2': ('string', '#1231'),
     }
-    for key, (ptype,val) in inferred_ptypes.items():
+    for key, (ptype,val) in list(inferred_ptypes.items()):
         pkg.insert_property(key, val)
         prop = pkg.get_property(key)
         assert prop.data_type == ptype
@@ -225,7 +225,7 @@ def test_package_objects(client, superuser_client, dataset):
 
     # get as normal user
     pkg2 = client.get(pkg)
-    print "sources =", pkg2.sources
+    print("sources =", pkg2.sources)
     assert len(pkg2.sources) > 0
     assert pkg2.sources[0].name == 'My Source File'
     del pkg2
@@ -235,7 +235,7 @@ def test_package_objects(client, superuser_client, dataset):
 
     # get as normal user
     pkg2 = client.get(pkg)
-    print "files =", pkg2.files
+    print("files =", pkg2.files)
     assert len(pkg2.files) > 0
     del pkg2
 
@@ -244,7 +244,7 @@ def test_package_objects(client, superuser_client, dataset):
 
     # get as normal user
     pkg2 = client.get(pkg)
-    print "view =", pkg2.view
+    print("view =", pkg2.view)
     assert len(pkg2.view) > 0
     del pkg2
     del pkg

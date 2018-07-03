@@ -37,7 +37,7 @@ class TimeSeriesStream():
         return description.get('StreamStatus')
 
     def _channel_by_name(self, name):
-        matches = filter(lambda c: c.name==name, self._channels)
+        matches = [c for c in self._channels if c.name==name]
         if len(matches) > 1:
             raise Exception("Too many channels match name '{}'".format(name))
         if len(matches) == 0:
@@ -45,7 +45,7 @@ class TimeSeriesStream():
         return matches[0]
 
     def _channel_by_id(self, id):
-        matches = filter(lambda c: c.id==id, self._channels)
+        matches = [c for c in self._channels if c.id==id]
         if len(matches) == 0:
             raise Exception("No channels match ID '{}'".format(id))
         return matches[0]
@@ -173,7 +173,7 @@ class TimeSeriesStream():
         gap_fuzz = period*0.75
         gaps = ts_steps > period + gap_fuzz
         gaps_ind = np.where(gaps)[0]
-        gap_pairs = zip(np.hstack((0,gaps_ind)), np.hstack((gaps_ind, len(series))))
+        gap_pairs = list(zip(np.hstack((0,gaps_ind)), np.hstack((gaps_ind, len(series)))))
 
         # iterate over contiguous segments
         for starti, endi in gap_pairs:
@@ -181,7 +181,7 @@ class TimeSeriesStream():
                 raise Exception("Data contains extremely small contiguous section {}[{}:{}]" \
                                     .format(channel.id,starti,endi))
 
-            print "Sending contiguous data: {} to {}".format(starti, endi)
+            print("Sending contiguous data: {} to {}".format(starti, endi))
             # get contiguous segment
             data = series[starti:endi+1]
             # send contiguous region of data
