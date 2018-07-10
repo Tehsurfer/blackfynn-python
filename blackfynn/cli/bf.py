@@ -1,4 +1,5 @@
-'''usage:
+"""
+usage:
   bf [options] [<command>] [<args>...]
 
 Available commands:
@@ -32,7 +33,7 @@ global options:
   -h --help                 Show help
   --dataset=<dataset>       Use specified dataset (instead of your current working dataset)
   --profile=<name>          Use specified profile (instead of default)
-'''
+"""
 
 from docopt import docopt
 import os
@@ -40,7 +41,8 @@ import os
 import blackfynn
 from blackfynn import Blackfynn, Settings
 
-from .working_dataset import set_working_dataset
+from blackfynn.cli.working_dataset import set_working_dataset
+
 
 def blackfynn_cli():
     args = docopt(__doc__,
@@ -54,7 +56,7 @@ def blackfynn_cli():
         return
 
     if args['<command>'] == 'profile':
-        from . import bf_profile
+        from blackfynn.cli import bf_profile
         bf_profile.main()
         return
 
@@ -78,7 +80,7 @@ def blackfynn_cli():
         exit(e)
 
     if args['<command>'] == 'status':
-        from . import bf_status
+        from blackfynn.cli import bf_status
         bf_status.main(bf)
     elif args['<command>'] == 'use':
         from . import bf_use
@@ -130,3 +132,6 @@ def blackfynn_cli():
         bf_search.main(bf)
     else:
         exit("Invalid command: '{}'\nSee 'bf help' for available commands".format(args['<command>']))
+
+if __name__ == "__main__":
+    blackfynn_cli()

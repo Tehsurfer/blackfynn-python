@@ -352,7 +352,7 @@ class Cache(object):
         Returns the size of the cache in bytes
         """
         all_files = self.page_files + [self.index_loc]
-        return sum([os.stat(x).st_size for x in all_files])
+        return sum([os.stat(x).st_size for x in all_files if os.path.exists(x)])
 
 def get_cache(settings, start_compaction=False, init=True):
     cache = Cache(settings)

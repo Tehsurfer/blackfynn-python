@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import json
-import base64
 import requests
 from concurrent.futures import TimeoutError
 from requests_futures.sessions import FuturesSession
@@ -9,6 +8,7 @@ from requests_futures.sessions import FuturesSession
 # blackfynn
 from blackfynn.utils import log
 from blackfynn.models import User
+
 
 class UnauthorizedException(Exception):
     pass
@@ -70,11 +70,9 @@ class ClientSession(object):
         """
         # make authentication request
         session_response = self._post('/account/api/session', json=dict(tokenId = self._api_token, secret = self._api_secret))
-
         # parse response, set session
         self.token = session_response['session_token']
         self.profile = User.from_dict(self._get('/user/'))
-
         if organization is None:
             organization = session_response.get('organization')
 

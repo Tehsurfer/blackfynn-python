@@ -1,7 +1,4 @@
 import os
-import sys
-import psutil
-import tempfile
 import configparser
 
 BLACKFYNN_DIR_DEFAULT = os.path.join(os.path.expanduser('~'), '.blackfynn')
@@ -69,6 +66,7 @@ ENVIRONMENT_VARIABLES = {
     's3_host'                : ('S3_HOST', str),
     's3_port'                : ('S3_PORT', str)
 }
+
 
 class Settings(object):
     def __init__(self, profile=None, overrides=None, env_override=True):

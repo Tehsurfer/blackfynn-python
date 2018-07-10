@@ -5,9 +5,6 @@ import math
 import datetime
 import numpy as np
 import pandas as pd
-from types import NoneType
-from itertools import islice, count
-from concurrent.futures import ThreadPoolExecutor
 
 # blackfynn
 from blackfynn.api.base import APIBase
@@ -16,8 +13,7 @@ from blackfynn.utils import (
     usecs_to_datetime, usecs_since_epoch, infer_epoch, log
 )
 from blackfynn.models import (
-    File, TimeSeries,TimeSeriesChannel, TimeSeriesAnnotation,
-    get_package_class, TimeSeriesAnnotation, TimeSeriesAnnotationLayer
+    TimeSeries,TimeSeriesChannel, TimeSeriesAnnotation, TimeSeriesAnnotationLayer
 )
 from blackfynn.cache import get_cache
 
@@ -148,7 +144,7 @@ class ChannelPage(object):
             times = vec_usecs_to_datetime(times)
 
         # return pandas series
-        return pd.Series( data=data, index=times, name=self.channel)
+        return pd.Series(data=data, index=times, name=self.channel)
 
 
 class ChannelIterator(object):
@@ -364,7 +360,7 @@ class TimeSeriesAPI(APIBase):
     # ~~~~~~~~~~~~~~~~~~~
 
     def get_ts_data_iter(self, ts, start, end, channels, chunk_size,
-                         use_cache,length=None):
+                         use_cache, length=None):
         """
         Iterator will be constructed based over timespan (start,end) or (start, start+seconds)
 
@@ -895,5 +891,3 @@ class TimeSeriesAPI(APIBase):
                 raise Exception('Expecting TimeSeries instance or ID')
 
         return channels
-
-

@@ -1,4 +1,4 @@
-'''
+"""
 usage:
   bf create [options] <name> [<destination>]
 
@@ -6,13 +6,14 @@ global options:
   -h --help                 Show help
   --dataset=<dataset>       Use specified dataset (instead of your current working dataset)
   --profile=<name>          Use specified profile (instead of default)
-'''
+"""
 from docopt import docopt
 from blackfynn import Collection
 
 from .cli_utils import get_item
 
 from .working_dataset import require_working_dataset
+
 
 def main(bf):
     args = docopt(__doc__)

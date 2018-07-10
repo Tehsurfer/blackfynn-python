@@ -19,6 +19,7 @@ from blackfynn.api.data import (
     DatasetsAPI, PackagesAPI, FilesAPI, DataAPI, TabularAPI
 )
 
+
 class Blackfynn(object):
     """
     The client provides an interface to the Blackfynn platform, giving you the

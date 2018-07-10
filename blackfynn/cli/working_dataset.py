@@ -2,6 +2,7 @@ import os
 import psutil
 import tempfile
 
+
 def set_working_dataset(dataset):
     ds_file = get_dataset_file()
     try:
@@ -12,6 +13,7 @@ def set_working_dataset(dataset):
     except:
         print("We encountered an error while setting your working dataset.")
     return None
+
 
 def get_dataset_file():
     try:
@@ -24,6 +26,7 @@ def get_dataset_file():
     fname = 'blackfynn_working_dataset_{}'.format(parent_shell_pid)
     return os.path.join(tempfile.gettempdir(), fname)
 
+
 def working_dataset_id():
     ds_file = get_dataset_file()
     if os.path.exists(ds_file):
@@ -34,6 +37,7 @@ def working_dataset_id():
         except:
             pass
     return None
+
 
 def require_working_dataset(bf):
     ds = working_dataset_id()
