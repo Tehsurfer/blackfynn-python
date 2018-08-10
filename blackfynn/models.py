@@ -152,10 +152,12 @@ class BaseNode(object):
 
         # validate obj_key
         if obj_key == '' or obj_key is None:
-            content = data
+            content = data.decode('utf-8')
         else:
+            content = data.decode('utf-8')
             content = data[obj_key]
 
+        
         class_args = _get_all_class_args(cls)
 
         # find overlapping keys
