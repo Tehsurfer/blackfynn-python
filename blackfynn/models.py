@@ -151,7 +151,7 @@ class BaseNode(object):
         else:
             obj_key = cls._object_key
             
-        print('data is:' + stc(data))
+        print('data is:' + str(data))
 
         # validate obj_key
         if obj_key == '' or obj_key is None:
