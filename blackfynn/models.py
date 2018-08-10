@@ -154,10 +154,8 @@ class BaseNode(object):
         # validate obj_key
         if obj_key == '' or obj_key is None:
             content = data.decode('utf-8')
-            content = json.loads(content)
         else:
-            content = data.decode('utf-8')
-            content = json.loads(content)
+            data = data.decode('utf-8')
             content = data[obj_key]
 
         
