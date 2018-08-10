@@ -150,12 +150,13 @@ class BaseNode(object):
             obj_key = object_key
         else:
             obj_key = cls._object_key
+            
+        print('data is:' + stc(data))
 
         # validate obj_key
         if obj_key == '' or obj_key is None:
-            content = json.loads(data.decode('utf-8'))
+            content = data
         else:
-            data = json.loads(data.decode('utf-8'))
             content = data[obj_key]
 
         
