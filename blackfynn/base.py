@@ -71,7 +71,7 @@ class ClientSession(object):
         # make authentication request
         session_response = self._post('/account/api/session', json=dict(tokenId = self._api_token, secret = self._api_secret))
         # parse response, set session
-        session_response = session_response.format('utf-8')
+        session_response = session_response.decode('utf-8')
         session_response = json.loads(session_response)
         self.token = session_response['session_token']
         self.profile = User.from_dict(self._get('/user/'))
