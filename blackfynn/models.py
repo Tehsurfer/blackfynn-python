@@ -8,6 +8,7 @@ import datetime
 import requests
 import numpy as np
 import pandas as pd
+import json
 
 from uuid import uuid4
 from blackfynn.utils import (
@@ -153,8 +154,10 @@ class BaseNode(object):
         # validate obj_key
         if obj_key == '' or obj_key is None:
             content = data.decode('utf-8')
+            content = json.loads(content)
         else:
             content = data.decode('utf-8')
+            content = json.loads(content)
             content = data[obj_key]
 
         
